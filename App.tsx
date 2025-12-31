@@ -2,9 +2,9 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Modal } from './components/Modal';
 import { ContactForm } from './components/ContactForm';
-import { LoginPage } from './components/LoginPage';
 import { LandingPage } from './components/LandingPage';
-import { TeacherLogin } from './components/TeacherLogin';
+import { StudentAuth } from './components/StudentAuth';
+import { TeacherAuth } from './components/TeacherAuth';
 import { TeacherDashboard } from './components/TeacherDashboard';
 import { RatingReview } from './components/RatingReview';
 import { ChatBox } from './components/ChatBox';
@@ -887,7 +887,7 @@ const App: React.FC = () => {
 
       {/* Teacher Path */}
       {currentPage === 'teacher' && !teacherEmail && (
-        <TeacherLogin
+        <TeacherAuth
           onLoginSuccess={(email) => {
             setTeacherEmail(email);
             setIsLoggedIn(true);
@@ -909,7 +909,7 @@ const App: React.FC = () => {
 
       {/* Student Path */}
       {currentPage === 'student' && !isLoggedIn && (
-        <LoginPage onLoginSuccess={() => {
+        <StudentAuth onLoginSuccess={() => {
           setIsLoggedIn(true);
         }} />
       )}
