@@ -282,7 +282,7 @@ const App: React.FC = () => {
 
   // 1. Student Views
   const renderStudentDashboard = () => (
-    <div className="space-y-4 animate-in fade-in duration-700">
+    <div className="space-y-4 opacity-0 animate-in duration-700">
       <div className="bg-emerald-900 rounded-xl p-4 text-white relative overflow-hidden shadow-lg">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center relative z-10 gap-3">
           <div>
