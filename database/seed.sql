@@ -1,5 +1,10 @@
 -- Seed Data for Quranify Platform
 
+-- Note: Admin users must be created in Supabase Auth manually or via API:
+-- Admin 1: walid.genidy@gmail.com / Admin123@@123
+-- Admin 2: sohila.esmatt93@gmail.com / Admin123@@123
+-- After creating in Auth, add to users table with role='admin'
+
 -- Insert Sample Teachers
 INSERT INTO teachers (name, specialization, bio, rating, hourly_rate, sessions_count, earnings, status, joined_date) VALUES
 ('د. أحمد السقا', 'قراءات عشر', 'إجازة متصلة بالسند إلى رسول الله ﷺ.', 4.9, 25.00, 1240, 15400.00, 'active', '2022-05-10'),

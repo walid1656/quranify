@@ -1,53 +1,100 @@
-import React, { useState } from 'react';
-import { Users, Calendar, Award, MessageSquare, BarChart3, Settings, LogOut } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { LogOut, BarChart3, Users, BookOpen, MessageSquare, Calendar, Settings } from 'lucide-react';
+import { supabase } from '../services/supabaseClient';
 
 interface TeacherDashboardProps {
+  email: string;
   onLogout: () => void;
 }
 
-export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout }) => {
+export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ email, onLogout }) => {
   const [activeTab, setActiveTab] = useState('overview');
+  const [stats, setStats] = useState({
+    students: 0,
+    courses: 0,
+    lessons: 0,
+    earnings: 0
+  });
+  const [loading, setLoading] = useState(true);
 
-  const teacherStats = [
-    { label: 'الطلاب النشطون', value: '45', icon: Users, color: 'bg-blue-100' },
-    { label: 'الدروس هذا الأسبوع', value: '12', icon: Calendar, color: 'bg-emerald-100' },
-    { label: 'التقييم', value: '4.9★', icon: Award, color: 'bg-yellow-100' },
-    { label: 'الرسائل', value: '23', icon: MessageSquare, color: 'bg-purple-100' },
-  ];
+  useEffect(() => {
+    fetchTeacherData();
+  }, [email]);
 
-  const upcomingLessons = [
-    { id: 1, student: 'أحمد محمد', time: '02:00 PM', subject: 'تجويد', status: 'confirmed' },
-    { id: 2, student: 'فاطمة علي', time: '03:30 PM', subject: 'حفظ', status: 'pending' },
-    { id: 3, student: 'محمود حسن', time: '05:00 PM', subject: 'تفسير', status: 'confirmed' },
-  ];
+  const fetchTeacherData = async () => {
+    try {
+      const { data: teacher } = await supabase
+        .from('teachers')
+        .select('id, students_count, courses_count')
+        .eq('email', email)
+        .single();
+
+      if (teacher) {
+        setStats({
+          students: teacher.students_count || 0,
+          courses: teacher.courses_count || 0,
+          lessons: (teacher.students_count || 0) * 5,
+          earnings: (teacher.students_count || 0) * 50
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching teacher data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    onLogout();
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-emerald-50">
+        <div className="animate-spin">
+          <div className="w-16 h-16 border-4 border-emerald-200 border-t-emerald-600 rounded-full"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-slate-50" dir="rtl">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-black text-emerald-600 quran-font">لوحة المعلم</h1>
-          <button onClick={onLogout} className="flex items-center gap-2 text-red-600 font-bold hover:bg-red-50 px-4 py-2 rounded-lg">
-            <LogOut size={20} /> تسجيل خروج
+      <header className="bg-white shadow">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-emerald-900 quran-font">لوحة التحكم</h1>
+            <p className="text-gray-600">{email}</p>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+          >
+            <LogOut size={20} /> تسجيل الخروج
           </button>
         </div>
       </header>
 
       {/* Navigation Tabs */}
-      <nav className="bg-white border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 flex gap-8">
+      <nav className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-6 flex gap-8">
           {[
-            { id: 'overview', label: 'النظرة العامة', icon: BarChart3 },
-            { id: 'lessons', label: 'الدروس المجدولة', icon: Calendar },
+            { id: 'overview', label: 'نظرة عامة', icon: BarChart3 },
             { id: 'students', label: 'الطلاب', icon: Users },
+            { id: 'courses', label: 'الدورات', icon: BookOpen },
             { id: 'messages', label: 'الرسائل', icon: MessageSquare },
-            { id: 'settings', label: 'الإعدادات', icon: Settings },
+            { id: 'schedule', label: 'الجدول', icon: Calendar },
+            { id: 'settings', label: 'الإعدادات', icon: Settings }
           ].map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-4 font-bold border-b-2 transition-colors flex items-center gap-2 ${
-                activeTab === tab.id ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-600 hover:text-slate-900'
+              className={`py-4 px-2 border-b-2 font-semibold flex items-center gap-2 ${
+                activeTab === tab.id
+                  ? 'border-emerald-600 text-emerald-600'
+                  : 'border-transparent text-gray-600 hover:text-gray-900'
               }`}
             >
               <tab.icon size={20} /> {tab.label}
@@ -56,117 +103,117 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout }) 
         </div>
       </nav>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 py-12">
+      {/* Content */}
+      <main className="max-w-7xl mx-auto px-6 py-8">
         {activeTab === 'overview' && (
-          <div className="space-y-8">
-            {/* Stats Grid */}
+          <div className="space-y-6">
             <div className="grid md:grid-cols-4 gap-6">
-              {teacherStats.map((stat, i) => (
-                <div key={i} className="bg-white p-6 rounded-xl border border-slate-200 hover:shadow-lg transition-shadow">
-                  <div className={`w-12 h-12 ${stat.color} rounded-lg flex items-center justify-center mb-4`}>
-                    <stat.icon className="text-slate-700" size={24} />
-                  </div>
-                  <p className="text-sm text-slate-600 mb-1">{stat.label}</p>
-                  <h3 className="text-3xl font-black text-slate-900">{stat.value}</h3>
+              {[
+                { label: 'عدد الطلاب', value: stats.students, color: 'emerald' },
+                { label: 'الدورات', value: stats.courses, color: 'blue' },
+                { label: 'الدروس', value: stats.lessons, color: 'purple' },
+                { label: 'الأرباح', value: `$${stats.earnings}`, color: 'yellow' }
+              ].map((stat, i) => (
+                <div key={i} className={`bg-${stat.color}-50 border-2 border-${stat.color}-200 rounded-xl p-6`}>
+                  <p className="text-gray-600 text-sm">{stat.label}</p>
+                  <p className={`text-3xl font-bold text-${stat.color}-600 mt-2`}>{stat.value}</p>
                 </div>
               ))}
             </div>
 
-            {/* Upcoming Lessons */}
-            <div className="bg-white rounded-xl border border-slate-200 p-8">
-              <h2 className="text-2xl font-bold text-slate-900 mb-6 quran-font">الدروس القادمة</h2>
-              <div className="space-y-4">
-                {upcomingLessons.map(lesson => (
-                  <div key={lesson.id} className="flex justify-between items-center p-4 bg-slate-50 rounded-lg border border-slate-200 hover:border-emerald-300 transition-colors">
+            <div className="bg-white rounded-xl shadow p-6">
+              <h3 className="text-xl font-bold text-emerald-900 mb-4">نشاط الطلاب</h3>
+              <div className="space-y-3">
+                {[
+                  { name: 'محمود علي', action: 'أنهى درس الفاتحة', time: 'منذ 2 ساعة' },
+                  { name: 'فريدة أحمد', action: 'بدأت درس البقرة', time: 'منذ 3 ساعات' },
+                  { name: 'عمر محمد', action: 'حقق 95% في الاختبار', time: 'منذ 5 ساعات' }
+                ].map((activity, i) => (
+                  <div key={i} className="flex justify-between p-3 border-b">
                     <div>
-                      <h4 className="font-bold text-slate-900">{lesson.student}</h4>
-                      <p className="text-sm text-slate-600">{lesson.subject}</p>
+                      <p className="font-semibold">{activity.name}</p>
+                      <p className="text-sm text-gray-600">{activity.action}</p>
                     </div>
-                    <div className="text-right">
-                      <p className="font-bold text-slate-900">{lesson.time}</p>
-                      <span className={`text-xs font-bold px-3 py-1 rounded-full ${
-                        lesson.status === 'confirmed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-                      }`}>
-                        {lesson.status === 'confirmed' ? 'مؤكد' : 'قيد الانتظار'}
-                      </span>
-                    </div>
+                    <p className="text-sm text-gray-500">{activity.time}</p>
                   </div>
                 ))}
               </div>
-            </div>
-
-            {/* Performance Chart */}
-            <div className="bg-white rounded-xl border border-slate-200 p-8">
-              <h2 className="text-2xl font-bold text-slate-900 mb-6 quran-font">إحصائيات الأداء</h2>
-              <div className="bg-gradient-to-r from-emerald-100 to-blue-100 p-8 rounded-lg text-center">
-                <p className="text-slate-600 mb-4">معدل رضا الطلاب: 94%</p>
-                <div className="w-full bg-white rounded-full h-4">
-                  <div className="bg-emerald-500 h-4 rounded-full" style={{ width: '94%' }}></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'lessons' && (
-          <div className="bg-white rounded-xl border border-slate-200 p-8">
-            <h2 className="text-2xl font-bold text-slate-900 mb-6 quran-font">جدول الدروس</h2>
-            <div className="space-y-4">
-              {upcomingLessons.map(lesson => (
-                <div key={lesson.id} className="flex justify-between items-center p-6 bg-slate-50 rounded-lg border border-slate-200">
-                  <div>
-                    <h4 className="font-bold text-slate-900 text-lg">{lesson.student}</h4>
-                    <p className="text-emerald-600 font-semibold">{lesson.subject}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-bold text-slate-900 text-lg">{lesson.time}</p>
-                    <button className="mt-2 px-4 py-2 bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-700 transition-colors">
-                      بدء الدرس
-                    </button>
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
         )}
 
         {activeTab === 'students' && (
-          <div className="bg-white rounded-xl border border-slate-200 p-8">
-            <h2 className="text-2xl font-bold text-slate-900 mb-6 quran-font">قائمة الطلاب</h2>
-            <p className="text-slate-600">45 طالب نشط هذا الشهر</p>
-            <button className="mt-4 px-6 py-3 bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-700 transition-colors">
-              عرض جميع الطلاب
+          <div className="bg-white rounded-xl shadow p-6">
+            <h3 className="text-xl font-bold text-emerald-900 mb-4">قائمة الطلاب</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="border-b-2">
+                  <tr>
+                    <th className="text-right py-3">الاسم</th>
+                    <th className="text-right py-3">المستوى</th>
+                    <th className="text-right py-3">التقدم</th>
+                    <th className="text-right py-3">الإجراء</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    { name: 'محمود علي', level: 'متقدم', progress: 85 },
+                    { name: 'فريدة أحمد', level: 'متوسط', progress: 60 }
+                  ].map((student, i) => (
+                    <tr key={i} className="border-b">
+                      <td className="py-3">{student.name}</td>
+                      <td className="py-3">{student.level}</td>
+                      <td className="py-3">
+                        <div className="w-32 bg-gray-200 rounded h-2">
+                          <div className="bg-emerald-600 h-2 rounded" style={{width: `${student.progress}%`}}></div>
+                        </div>
+                      </td>
+                      <td className="py-3">
+                        <button className="text-emerald-600 hover:underline">عرض</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'courses' && (
+          <div className="bg-white rounded-xl shadow p-6">
+            <h3 className="text-xl font-bold text-emerald-900 mb-4">الدورات</h3>
+            <button className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 mb-6">
+              + إضافة دورة جديدة
             </button>
+            <div className="space-y-4">
+              {['دورة الحفظ المتقدم', 'دورة التجويد الأساسية'].map((course, i) => (
+                <div key={i} className="border rounded-lg p-4">
+                  <h4 className="font-bold text-emerald-900">{course}</h4>
+                  <p className="text-sm text-gray-600 mt-2">15 طالب نشط</p>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
         {activeTab === 'messages' && (
-          <div className="bg-white rounded-xl border border-slate-200 p-8">
-            <h2 className="text-2xl font-bold text-slate-900 mb-6 quran-font">الرسائل</h2>
-            <p className="text-slate-600">لديك 23 رسالة جديدة</p>
-            <button className="mt-4 px-6 py-3 bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-700 transition-colors">
-              عرض جميع الرسائل
-            </button>
+          <div className="bg-white rounded-xl shadow p-6">
+            <h3 className="text-xl font-bold text-emerald-900 mb-4">الرسائل</h3>
+            <p className="text-gray-600">لا توجد رسائل جديدة</p>
+          </div>
+        )}
+
+        {activeTab === 'schedule' && (
+          <div className="bg-white rounded-xl shadow p-6">
+            <h3 className="text-xl font-bold text-emerald-900 mb-4">جدول الدروس</h3>
+            <p className="text-gray-600">لا توجد دروس مجدولة</p>
           </div>
         )}
 
         {activeTab === 'settings' && (
-          <div className="bg-white rounded-xl border border-slate-200 p-8">
-            <h2 className="text-2xl font-bold text-slate-900 mb-6 quran-font">الإعدادات</h2>
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">الموضوعات المتخصص فيها</label>
-                <input type="text" value="التجويد - الحفظ" className="w-full px-4 py-3 border border-slate-300 rounded-lg" />
-              </div>
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">السعر بالساعة</label>
-                <input type="number" value="50" className="w-full px-4 py-3 border border-slate-300 rounded-lg" />
-              </div>
-              <button className="px-6 py-3 bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-700 transition-colors">
-                حفظ التغييرات
-              </button>
-            </div>
+          <div className="bg-white rounded-xl shadow p-6">
+            <h3 className="text-xl font-bold text-emerald-900 mb-4">الإعدادات</h3>
+            <button className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg">تحرير الملف الشخصي</button>
           </div>
         )}
       </main>

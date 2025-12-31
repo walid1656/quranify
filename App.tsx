@@ -2,10 +2,10 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Modal } from './components/Modal';
 import { ContactForm } from './components/ContactForm';
+import { LoginPage } from './components/LoginPage';
 import { LandingPage } from './components/LandingPage';
-import { LoginPageV2 } from './components/LoginPageV2';
+import { TeacherLogin } from './components/TeacherLogin';
 import { TeacherDashboard } from './components/TeacherDashboard';
-import { AdminDashboard } from './components/AdminDashboard';
 import { RatingReview } from './components/RatingReview';
 import { ChatBox } from './components/ChatBox';
 import { CalendarScheduler } from './components/CalendarScheduler';
@@ -60,8 +60,12 @@ async function decodeAudioData(data: Uint8Array, ctx: AudioContext, sampleRate: 
 }
 
 const App: React.FC = () => {
+  // --- Page State ---
+  const [currentPage, setCurrentPage] = useState<'landing' | 'student' | 'teacher'>('landing');
+  const [teacherEmail, setTeacherEmail] = useState('');
+
   // --- Authentication State ---
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   // --- Core Application State ---
   const [userRole, setUserRole] = useState<UserRole>('student');
@@ -873,43 +877,44 @@ const App: React.FC = () => {
 
   return (
     <>
-      {/* Show Landing Page if not logged in */}
-      {!isLoggedIn && (
-        <LandingPage 
-          onGetStarted={() => {}} 
-          onViewTeachers={() => {}}
+      {/* Landing Page */}
+      {currentPage === 'landing' && (
+        <LandingPage
+          onStudentSignup={() => setCurrentPage('student')}
+          onTeacherLogin={() => setCurrentPage('teacher')}
         />
       )}
 
-      {/* Show Role Selection Login */}
-      {isLoggedIn === 'login' && (
-        <LoginPageV2 
-          onLoginSuccess={(role) => {
-            setUserRole(role);
+      {/* Teacher Path */}
+      {currentPage === 'teacher' && !teacherEmail && (
+        <TeacherLogin
+          onLoginSuccess={(email) => {
+            setTeacherEmail(email);
             setIsLoggedIn(true);
           }}
-          onBack={() => setIsLoggedIn(false)}
+          onBackToLanding={() => setCurrentPage('landing')}
         />
       )}
 
-      {/* Show Teacher Dashboard */}
-      {isLoggedIn === true && userRole === 'teacher' && (
-        <TeacherDashboard onLogout={() => {
-          setIsLoggedIn(false);
-          setUserRole('student');
+      {currentPage === 'teacher' && teacherEmail && (
+        <TeacherDashboard
+          email={teacherEmail}
+          onLogout={() => {
+            setTeacherEmail('');
+            setIsLoggedIn(false);
+            setCurrentPage('landing');
+          }}
+        />
+      )}
+
+      {/* Student Path */}
+      {currentPage === 'student' && !isLoggedIn && (
+        <LoginPage onLoginSuccess={() => {
+          setIsLoggedIn(true);
         }} />
       )}
 
-      {/* Show Admin Dashboard */}
-      {isLoggedIn === true && userRole === 'admin' && (
-        <AdminDashboard onLogout={() => {
-          setIsLoggedIn(false);
-          setUserRole('student');
-        }} />
-      )}
-
-      {/* Show Student Dashboard (Original App) */}
-      {isLoggedIn === true && userRole === 'student' && (
+      {currentPage === 'student' && isLoggedIn && (
         <div className="min-h-screen flex flex-col bg-slate-50 font-['Cairo']" style={{ '--primary-custom': config.primaryColor } as any}>
       {/* Simulation Toggle (Demo Purposes) */}
       <div className="fixed bottom-8 left-8 z-50 flex bg-white/90 backdrop-blur p-3 rounded-full shadow-2xl border gap-2">
