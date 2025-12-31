@@ -1,0 +1,73 @@
+/* Global responsive utilities for Quranify */
+:root{
+  --container-max: 1200px;
+  --gap-xs: 8px;
+  --gap-sm: 12px;
+  --gap-md: 18px;
+  --gap-lg: 28px;
+  --radius: 1rem;
+  --primary: #10B981; /* fallback, overridden by inline styles */
+}
+
+/* Fluid typography */
+html{font-size:clamp(14px, 1.6vw, 18px);} 
+body{font-family: 'Cairo', sans-serif; background: #f8fafc; color: #0f172a; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);} 
+
+/* Container helper */
+.container{width:100%;max-width:var(--container-max);margin:0 auto;padding:clamp(12px,2vw,24px);} 
+
+/* Make images & videos responsive */
+img, picture, video, iframe{max-width:100%;height:auto;display:block}
+
+/* Fluid paddings for cards/buttons */
+.responsive-padding{padding:clamp(8px,1.6vw,24px)}
+.btn-responsive{padding:clamp(8px,10px,16px) clamp(12px,2.4vw,24px);font-weight:700;border-radius:999px}
+
+/* Utility: full-bleed sections on small screens */
+.full-bleed{width:100vw;position:relative;left:50%;right:50%;margin-left:-50vw;margin-right:-50vw}
+
+/* Tweak fixed elements spacing on small screens */
+@media (max-width:640px){
+  header .px-2{padding-left:12px;padding-right:12px}
+  .fixed{padding:8px}
+}
+
+/* Accessibility: increase hit area for small touch targets */
+.touch-target{padding:10px;min-height:44px;display:inline-flex;align-items:center;justify-content:center}
+
+/* Reduce heavy shadows on low-power devices */
+@media (prefers-reduced-motion: reduce){
+  *{transition:none!important;animation:none!important}
+}
+
+/* Handy breakpoint tweaks */
+@media (max-width:1024px){
+  :root{--container-max:900px}
+}
+@media (max-width:640px){
+  :root{--container-max:560px}
+  html{font-size:15px}
+}
+
+/* Simple helpers developers can use alongside Tailwind */
+.text-fluid-xs{font-size:clamp(12px,1.8vw,14px)}
+.text-fluid-md{font-size:clamp(16px,2.6vw,20px)}
+.card-rounded{border-radius:var(--radius)}
+
+/* Make tables horizontally scrollable on small screens */
+.table-responsive{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+/* Prevent body scroll locking unless explicitly desired */
+.no-scroll-lock *{overflow:visible}
+
+/* Small note: keep global overflow auto for natural scrolling */
+html,body{overflow:auto}
+
+/* Modal specific helpers */
+.modal-backdrop{padding:20px}
+.modal-panel{max-height:90vh;overflow:auto}
+
+/* Ensure RTL form alignment inside modal */
+.modal-panel form{direction:rtl}
+
+.btn-responsive{display:inline-flex;align-items:center;justify-content:center;padding:10px 16px;border-radius:16px;font-weight:800}

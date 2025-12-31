@@ -1,0 +1,8 @@
+{
+  "name": "Quranify - Global Learning Platform",
+  "description": "The world's most advanced online Quran learning platform featuring AI-powered tajweed assistance, interactive live classrooms, and a global marketplace for certified teachers.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
