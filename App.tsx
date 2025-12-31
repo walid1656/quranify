@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Modal } from './components/Modal';
 import { ContactForm } from './components/ContactForm';
-import { SupabaseDebugPanel } from './components/SupabaseDebugPanel';
 import { LoginPage } from './components/LoginPage';
 import { RatingReview } from './components/RatingReview';
 import { ChatBox } from './components/ChatBox';
@@ -59,7 +58,7 @@ async function decodeAudioData(data: Uint8Array, ctx: AudioContext, sampleRate: 
 
 const App: React.FC = () => {
   // --- Authentication State ---
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
 
   // --- Core Application State ---
   const [userRole, setUserRole] = useState<UserRole>('student');
@@ -1069,9 +1068,6 @@ const App: React.FC = () => {
         </div>
         )}
       </main>
-
-      {/* Debug Panel - shows Supabase connection status */}
-      <SupabaseDebugPanel />
 
       {/* Demo floating button to open modal form */}
       <div className="fixed bottom-6 right-6 z-50">
