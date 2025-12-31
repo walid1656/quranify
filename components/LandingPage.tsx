@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, BookOpen, Users, Award, Globe } from 'lucide-react';
+import { ArrowRight, BookOpen, Users, Award, Globe, Star } from 'lucide-react';
 
 interface LandingPageProps {
   onStudentSignup: () => void;
