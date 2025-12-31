@@ -2,7 +2,10 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Modal } from './components/Modal';
 import { ContactForm } from './components/ContactForm';
-import { LoginPage } from './components/LoginPage';
+import { LandingPage } from './components/LandingPage';
+import { LoginPageV2 } from './components/LoginPageV2';
+import { TeacherDashboard } from './components/TeacherDashboard';
+import { AdminDashboard } from './components/AdminDashboard';
 import { RatingReview } from './components/RatingReview';
 import { ChatBox } from './components/ChatBox';
 import { CalendarScheduler } from './components/CalendarScheduler';
@@ -870,9 +873,43 @@ const App: React.FC = () => {
 
   return (
     <>
-      {!isLoggedIn ? (
-        <LoginPage onLoginSuccess={() => setIsLoggedIn(true)} />
-      ) : (
+      {/* Show Landing Page if not logged in */}
+      {!isLoggedIn && (
+        <LandingPage 
+          onGetStarted={() => {}} 
+          onViewTeachers={() => {}}
+        />
+      )}
+
+      {/* Show Role Selection Login */}
+      {isLoggedIn === 'login' && (
+        <LoginPageV2 
+          onLoginSuccess={(role) => {
+            setUserRole(role);
+            setIsLoggedIn(true);
+          }}
+          onBack={() => setIsLoggedIn(false)}
+        />
+      )}
+
+      {/* Show Teacher Dashboard */}
+      {isLoggedIn === true && userRole === 'teacher' && (
+        <TeacherDashboard onLogout={() => {
+          setIsLoggedIn(false);
+          setUserRole('student');
+        }} />
+      )}
+
+      {/* Show Admin Dashboard */}
+      {isLoggedIn === true && userRole === 'admin' && (
+        <AdminDashboard onLogout={() => {
+          setIsLoggedIn(false);
+          setUserRole('student');
+        }} />
+      )}
+
+      {/* Show Student Dashboard (Original App) */}
+      {isLoggedIn === true && userRole === 'student' && (
         <div className="min-h-screen flex flex-col bg-slate-50 font-['Cairo']" style={{ '--primary-custom': config.primaryColor } as any}>
       {/* Simulation Toggle (Demo Purposes) */}
       <div className="fixed bottom-8 left-8 z-50 flex bg-white/90 backdrop-blur p-3 rounded-full shadow-2xl border gap-2">
